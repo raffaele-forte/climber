@@ -1,26 +1,7 @@
 #!/usr/bin/env python
 
-# Copyright(c) 2011-2013 Raffaele Forte <raffaele.forte@gmail.com>
-# http://www.backbox.org/
-#
-# This file is part of BackBox Scripts
-#
-# backbox-scripts is free software: you can redistribute it and/or
-# modify it under the terms of the GNU General Public License as 
-# published by the Free Software Foundation, either version 3 of the 
-# License, or (at your option) any later version.
-#
-# backbox-scripts is distributed in the hope that it will be 
-# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with backbox-scripts. If not, see <http://www.gnu.org/licenses/>.
-
 import argparse, getpass, os, sys, time
 
-from Exscript.util.interact import read_login
 from Exscript.util.template import eval_file
 from Exscript.protocols import SSH2, Telnet, Account
 
@@ -31,7 +12,7 @@ ENDC  = '\033[0m'
 
 DEVNULL = open(os.devnull, 'w')
 
-PATH = "~/climber-logs/"
+PATH = "~/climber/"
 
 
 def print_banner():
@@ -89,13 +70,13 @@ def do_something(host, port, service, username, password, plugin):
             conn = SSH2()
         if service == 'telnet':
             conn = Telnet()
-
+            
         conn.connect(host, port)
         conn.login(account)
-        
-        if conn.guess_os() != 'shell':
-            sys.exit('[!] Not Unix shell')
-            
+           
+        driver = conn.get_driver()
+        print INFO + '\n[i] Using ' + driver.name + ' driver...' + ENDC
+                            
         my_dir = make_dirs(host)
      
         if plugin:
