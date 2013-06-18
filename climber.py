@@ -22,6 +22,7 @@ def print_banner():
     header += INFO +'   \     \___|  |_|  |  Y Y  \ \_\ \  ___/|  | \/ \n' + ENDC
     header += INFO +'    \______  /____/__|__|_|  /___  /\___  >__|    \n' + ENDC
     header += INFO +'           \/              \/    \/     \/        \n' + ENDC
+    header += INFO +'    Checks Unix system for privilege escalations  \n' + ENDC
     print header
     
 
@@ -113,7 +114,7 @@ def main():
     print_banner()
     
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description='Auditing tool to check local system misconfigurations that may allow attackers to escalate privileges.', version='%(prog)s v.0.1')
+    parser = argparse.ArgumentParser(description='Auditing tool to check system misconfigurations that may allow attackers to escalate privileges.', version='%(prog)s v.0.2')
    
     group = parser.add_argument_group('connection')
     group.add_argument('-H', '--host', action="store")

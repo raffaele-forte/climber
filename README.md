@@ -1,8 +1,8 @@
-climber
+Climber
 =======
 
-Auditing tool to check local system misconfigurations that may allow 
-attackers to escalate privileges.
+Auditing tool to check system misconfigurations that may allow attackers 
+to escalate privileges.
 
 
 Dependencies
@@ -15,7 +15,8 @@ Dependencies
 Note
 ------
 Climber need Exscript, a Python module and a template processor for 
-automating network connections over protocols such as Telnet or SSH. 
+automating network connections over protocols such as Telnet or SSH.
+
 This module is already included.
 
 https://github.com/knipknap/exscript
