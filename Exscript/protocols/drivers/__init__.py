@@ -3,9 +3,9 @@ from Exscript.protocols.drivers.driver import Driver
 from Exscript.protocols.drivers.aix import AIXDriver
 from Exscript.protocols.drivers.arbor_peakflow import ArborPeakflowDriver
 from Exscript.protocols.drivers.brocade import BrocadeDriver
-from Exscript.protocols.drivers.busybox import BusyBoxDriver
 from Exscript.protocols.drivers.enterasys import EnterasysDriver
 from Exscript.protocols.drivers.generic import GenericDriver
+from Exscript.protocols.drivers.generic_linux import GenericLinuxDriver
 from Exscript.protocols.drivers.hp_pro_curve import HPProCurveDriver
 from Exscript.protocols.drivers.ios import IOSDriver
 from Exscript.protocols.drivers.ios_xr import IOSXRDriver

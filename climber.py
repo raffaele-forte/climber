@@ -76,7 +76,7 @@ def do_something(host, port, service, username, password, plugin):
         conn.login(account)
            
         driver = conn.get_driver()
-        print INFO + '\n[i] Using ' + driver.name + ' driver...' + ENDC
+        print INFO + '\n[i] Using driver: ' + driver.name + ENDC
                             
         my_dir = make_dirs(host)
      
