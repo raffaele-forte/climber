@@ -17,9 +17,9 @@ Note
 Climber need Exscript, a Python module and a template processor for 
 automating network connections over protocols such as Telnet or SSH.
 
-This module is already included.
-
 https://github.com/knipknap/exscript
+
+This module is already included in Climber repository.
 
 
 License
