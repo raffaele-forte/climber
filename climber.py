@@ -109,19 +109,19 @@ def main():
     plugin = args.plugin
     
     if host == None:
-        host = raw_input(INFO + '[+]' + ENDC + ' Enter hostname or ip ' + INFO + '> ' + ENDC)
+        host = raw_input('%-12s' % ('set hostname') + INFO + ' > ' + ENDC)
         
     if (ssh == False) and (telnet == False):     
-        connection = raw_input(INFO + '[+]' + ENDC + ' Enter connection type ' + INFO + '> ' + ENDC)
-        if connection.lower() == 'ssh':
+        service = raw_input('%-12s' % ('set service') + INFO + ' > ' + ENDC)
+        if service.lower() == 'ssh':
             ssh = True
-        elif connection.lower() == 'telnet':
+        elif service.lower() == 'telnet':
             telnet = True
             
     if username == None:
-        username = raw_input(INFO + '[+]' + ENDC + ' Enter username ' + INFO + '> ' + ENDC)
+        username = raw_input('%-12s' % ('set username') +INFO + ' > ' + ENDC)
     if password == None:
-        password = getpass.getpass(INFO + '[+]' + ENDC + ' Enter password ' + INFO + '> ' + ENDC)
+        password = getpass.getpass('%-12s' % ('set password') + INFO + ' > ' + ENDC)
         
     account = Account(username, password)
     
@@ -130,7 +130,7 @@ def main():
     elif telnet:
         conn = Telnet()
     else:
-        sys.exit(ERROR + '\n[!] Set connection type: (ssh|telnet)\n' + ENDC)
+        sys.exit(ERROR + '\n[!] Service options: (ssh|telnet)\n' + ENDC)
         
     conn.connect(host, port)
     conn.login(account)
@@ -175,4 +175,4 @@ if __name__ == "__main__":
         sys.exit(ERROR + '\n\n[!] Quitting...\n' + ENDC)
     # Handle exceptions
     except Exception, error:
-        sys.exit(ERROR + '\n[!] ' + str(error) + '\n' + ENDC)
+        sys.exit(ERROR + '\n[!] Something went wrong. Quitting...\n' + ENDC)

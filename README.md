@@ -8,6 +8,7 @@ allow attackers to escalate the privileges.
 Dependencies
 ------------
 
+* Python >= 2.7
 * python-crypto
 * python-paramiko
 
