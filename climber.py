@@ -36,7 +36,7 @@ def print_banner():
 
 def myparser():
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description='Auditing tool to check system misconfigurations that may allow attackers to escalate privileges.', version='Climber v.1.0 - Powered by Raffaele Forte')
+    parser = argparse.ArgumentParser(description='Automated auditing tool to check system misconfigurations which may allow attackers to escalate the privileges.', version='Climber v.1.0 - Powered by Raffaele Forte')
    
     group = parser.add_argument_group('connection')
     group.add_argument('--host', action="store", help='set hostname or ip')
