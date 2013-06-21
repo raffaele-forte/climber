@@ -10,7 +10,7 @@ import time
 
 
 # Editable paths
-PATH_LOGS = '~/climber'
+PATH_LOGS = '~/Climber/logs'
 PATH_PLUGINS = 'plugins'
 
 # Terminal colors
@@ -23,7 +23,7 @@ DEVNULL = open(os.devnull, 'w')
 
 
 def print_banner():
-    header = INFO + '  _________  ___  __       ____                   \n' + ENDC
+    header  = INFO + '  _________  ___  __       ____                   \n' + ENDC
     header += INFO + '  \_   ___ \|  | |__| _____\_ |__   ___________   \n' + ENDC
     header += INFO + '  /    \  \/|  | |  |/     \| __ \_/ __ \_  __ \  \n' + ENDC
     header += INFO + '  \     \___|  |_|  |  Y Y  \ \_\ \  ___/|  | \/  \n' + ENDC
@@ -68,8 +68,8 @@ def save_logs(text, path, filename):
             f.writelines(text)
         finally:
             f.close()
-    except Exception, e:
-        sys.exit(ERROR + '\n[!] ' + str(e) + '\n' + ENDC)
+    except Exception, error:
+        sys.exit(ERROR + '\n[!] ' + str(error) + '\n' + ENDC)
         
 
 def list_plugins(path):
@@ -77,8 +77,8 @@ def list_plugins(path):
         plugins = os.listdir(path)
         plugins.sort()
         return plugins
-    except Exception, e:
-        sys.exit(ERROR + '\n[!] ' + str(e) + '\n' + ENDC)
+    except Exception, error:
+        sys.exit(ERROR + '\n[!] ' + str(error) + '\n' + ENDC)
         
 
 def run_plugin(conn, logs, category, plugin):
@@ -91,6 +91,7 @@ def run_plugin(conn, logs, category, plugin):
         print '  %-20s' % (plugin) + '[' + DONE + 'ok' + ENDC + ']'       
     except:
         print '  %-20s' % (plugin) + '[' + ERROR + 'ko' + ENDC + ']'
+        pass
 
 
 def main():
@@ -121,7 +122,6 @@ def main():
         username = raw_input(INFO + '[+]' + ENDC + ' Enter username ' + INFO + '> ' + ENDC)
     if password == None:
         password = getpass.getpass(INFO + '[+]' + ENDC + ' Enter password ' + INFO + '> ' + ENDC)
-
         
     account = Account(username, password)
     
@@ -135,6 +135,9 @@ def main():
     conn.connect(host, port)
     conn.login(account)
     
+    # Try to disable history for current shell session
+    conn.execute('unset HISTFILE')
+    
     # Print info about used Exscript driver
     driver = conn.get_driver()
     print INFO + '\n[i] Using driver: ' + ENDC + driver.name
@@ -142,7 +145,7 @@ def main():
     logs = PATH_LOGS + '/' + host + '-' + str(int(time.time()))
     
     if plugin and (category == None):
-        sys.exit(ERROR + '\n[!] Set category: -C CATEGORY\n' + ENDC)
+        sys.exit(ERROR + '\n[!] No category\n' + ENDC)
     
     if category:
         print INFO + '\n[i] Plugins category: ' + ENDC + category + '\n'
@@ -161,10 +164,15 @@ def main():
     conn.send('exit\r')
     conn.close()
         
-    print INFO + '\n[i] Logs saved in ' + PATH_LOGS + '\n' + ENDC
+    print INFO + '\n[i] Logs saved in: ' + ENDC + PATH_LOGS + '\n'
+
 
 if __name__ == "__main__":
     try:
         main()
-    except KeyboardInterrupt, e:
+    # Handle keyboard interrupts
+    except KeyboardInterrupt:
         sys.exit(ERROR + '\n\n[!] Quitting...\n' + ENDC)
+    # Handle exceptions
+    except Exception, error:
+        sys.exit(ERROR + '\n[!] ' + str(error) + '\n' + ENDC)
