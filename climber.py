@@ -60,12 +60,14 @@ def save_logs(text, path, filename):
     logs = os.path.expanduser(path)
     if not os.path.exists(logs):
         os.makedirs(logs)
-    # Write mode creates a new file or overwrites the existing content of the file.
+    # Write mode creates a new file or overwrites the existing content of the file
     try:
         f = open(logs + '/' + filename, 'w')
         try:
             # Write a sequence of strings to a file
-            f.writelines(text)
+            splitted_text=text.split('\n')
+            f.writelines([item for item in splitted_text[:-1]])
+
         finally:
             f.close()
     except Exception, error:
