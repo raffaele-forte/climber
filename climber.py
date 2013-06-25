@@ -56,18 +56,17 @@ def myparser():
     
 
 def save_logs(text, path, filename):
-    # Make directories
-    logs = os.path.expanduser(path)
-    if not os.path.exists(logs):
-        os.makedirs(logs)
-    # Write mode creates a new file or overwrites the existing content of the file
     try:
+        # Make directories
+        logs = os.path.expanduser(path)
+        if not os.path.exists(logs):
+            os.makedirs(logs)
+        # Write mode creates a new file or overwrites the existing content of the file
         f = open(logs + '/' + filename, 'w')
         try:
             # Write a sequence of strings to a file
             splitted_text=text.split('\n')
             f.writelines([item for item in splitted_text[:-1]])
-
         finally:
             f.close()
     except Exception, error:
@@ -84,9 +83,7 @@ def list_plugins(path):
         
 
 def run_plugin(conn, logs, category, plugin):
-    
     path = logs + '/' + category
-    
     try:
         eval_file(conn, PATH_PLUGINS + '/' + category + '/' + plugin, foobar=None)      
         save_logs(conn.response, path, plugin + '.log')        
@@ -132,7 +129,7 @@ def main():
     elif telnet:
         conn = Telnet()
     else:
-        sys.exit(RED + '\n[!] Service options: (ssh|telnet)\n' + ENDC)
+        sys.exit(RED + '\n[!] Bad service type. Options: [ssh|telnet]\n' + ENDC)
         
     conn.connect(host, port)
     conn.login(account)
@@ -177,4 +174,4 @@ if __name__ == "__main__":
         sys.exit(RED + '\n\n[!] Quitting...\n' + ENDC)
     # Handle exceptions
     except Exception, error:
-        sys.exit(RED + '\n[!] Something went wrong. Quitting...\n' + ENDC)
+        sys.exit(RED + '\n[!] ' + str(error) + '\n' + ENDC)
