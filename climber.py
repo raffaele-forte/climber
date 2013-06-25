@@ -14,23 +14,23 @@ PATH_LOGS = '~/Climber/logs'
 PATH_PLUGINS = 'plugins'
 
 # Terminal colors
-INFO = '\033[97m'
-DONE = '\033[92m'
-ERROR = '\033[91m'
+BLUE = '\033[34m'
+GREEN = '\033[32m'
+RED = '\033[31m'
 ENDC = '\033[0m'
 
 DEVNULL = open(os.devnull, 'w')
 
 
 def print_banner():
-    header  = INFO + '  _________  ___  __       ____                   \n' + ENDC
-    header += INFO + '  \_   ___ \|  | |__| _____\_ |__   ___________   \n' + ENDC
-    header += INFO + '  /    \  \/|  | |  |/     \| __ \_/ __ \_  __ \  \n' + ENDC
-    header += INFO + '  \     \___|  |_|  |  Y Y  \ \_\ \  ___/|  | \/  \n' + ENDC
-    header += INFO + '   \______  /____/__|__|_|  /___  /\___  >__|     \n' + ENDC
-    header += INFO + '          \/              \/    \/     \/         \n' + ENDC
+    header  = BLUE + '  _________  ___  __       ____                   \n' + ENDC
+    header += BLUE + '  \_   ___ \|  | |__| _____\_ |__   ___________   \n' + ENDC
+    header += BLUE + '  /    \  \/|  | |  |/     \| __ \_/ __ \_  __ \  \n' + ENDC
+    header += BLUE + '  \     \___|  |_|  |  Y Y  \ \_\ \  ___/|  | \/  \n' + ENDC
+    header += BLUE + '   \______  /____/__|__|_|  /___  /\___  >__|     \n' + ENDC
+    header += BLUE + '          \/              \/    \/     \/         \n' + ENDC
     header += '   Checks Unix system for privilege escalations   \n' 
-    header += INFO + '   --------------------------------------------   \n' + ENDC
+    header += BLUE + '   --------------------------------------------   \n' + ENDC
     print header
 
 
@@ -71,7 +71,7 @@ def save_logs(text, path, filename):
         finally:
             f.close()
     except Exception, error:
-        sys.exit(ERROR + '\n[!] ' + str(error) + '\n' + ENDC)
+        sys.exit(RED + '\n[!] ' + str(error) + '\n' + ENDC)
         
 
 def list_plugins(path):
@@ -80,7 +80,7 @@ def list_plugins(path):
         plugins.sort()
         return plugins
     except Exception, error:
-        sys.exit(ERROR + '\n[!] ' + str(error) + '\n' + ENDC)
+        sys.exit(RED + '\n[!] ' + str(error) + '\n' + ENDC)
         
 
 def run_plugin(conn, logs, category, plugin):
@@ -90,9 +90,9 @@ def run_plugin(conn, logs, category, plugin):
     try:
         eval_file(conn, PATH_PLUGINS + '/' + category + '/' + plugin, foobar=None)      
         save_logs(conn.response, path, plugin + '.log')        
-        print '  %-20s' % (plugin) + '[' + DONE + 'ok' + ENDC + ']'       
+        print '  %-20s' % (plugin) + '[' + GREEN + 'ok' + ENDC + ']'       
     except:
-        print '  %-20s' % (plugin) + '[' + ERROR + 'ko' + ENDC + ']'
+        print '  %-20s' % (plugin) + '[' + RED + 'ko' + ENDC + ']'
         pass
 
 
@@ -111,19 +111,19 @@ def main():
     plugin = args.plugin
     
     if host == None:
-        host = raw_input('%-12s' % ('set hostname') + INFO + ' > ' + ENDC)
+        host = raw_input('%-12s' % ('set hostname') + BLUE + ' > ' + ENDC)
         
     if (ssh == False) and (telnet == False):     
-        service = raw_input('%-12s' % ('set service') + INFO + ' > ' + ENDC)
+        service = raw_input('%-12s' % ('set service') + BLUE + ' > ' + ENDC)
         if service.lower() == 'ssh':
             ssh = True
         elif service.lower() == 'telnet':
             telnet = True
             
     if username == None:
-        username = raw_input('%-12s' % ('set username') +INFO + ' > ' + ENDC)
+        username = raw_input('%-12s' % ('set username') +BLUE + ' > ' + ENDC)
     if password == None:
-        password = getpass.getpass('%-12s' % ('set password') + INFO + ' > ' + ENDC)
+        password = getpass.getpass('%-12s' % ('set password') + BLUE + ' > ' + ENDC)
         
     account = Account(username, password)
     
@@ -132,7 +132,7 @@ def main():
     elif telnet:
         conn = Telnet()
     else:
-        sys.exit(ERROR + '\n[!] Service options: (ssh|telnet)\n' + ENDC)
+        sys.exit(RED + '\n[!] Service options: (ssh|telnet)\n' + ENDC)
         
     conn.connect(host, port)
     conn.login(account)
@@ -142,15 +142,15 @@ def main():
     
     # Print info about used Exscript driver
     driver = conn.get_driver()
-    print INFO + '\n[i] Using driver: ' + ENDC + driver.name
+    print BLUE + '\n[i] Using driver: ' + ENDC + driver.name
     
     logs = PATH_LOGS + '/' + host + '-' + str(int(time.time()))
     
     if plugin and (category == None):
-        sys.exit(ERROR + '\n[!] No category\n' + ENDC)
+        sys.exit(RED + '\n[!] No category\n' + ENDC)
     
     if category:
-        print INFO + '\n[i] Plugins category: ' + ENDC + category + '\n'
+        print BLUE + '\n[i] Plugins category: ' + ENDC + category + '\n'
         if plugin:
             run_plugin(conn, logs, category, plugin)
         else:
@@ -159,14 +159,14 @@ def main():
      
     if (category == None) and (plugin == None):
         for c, category in enumerate(list_plugins(PATH_PLUGINS)):
-            print INFO + '\n[i] Loading plugins: ' + ENDC + category + '\n'
+            print BLUE + '\n[i] Loading plugins: ' + ENDC + category + '\n'
             for p, plugin in enumerate(list_plugins(PATH_PLUGINS + '/' + category)):
                 run_plugin(conn, logs, category, plugin)
 
     conn.send('exit\r')
     conn.close()
         
-    print INFO + '\n[i] Logs saved in: ' + ENDC + PATH_LOGS + '\n'
+    print BLUE + '\n[i] Logs saved in: ' + ENDC + PATH_LOGS + '\n'
 
 
 if __name__ == "__main__":
@@ -174,7 +174,7 @@ if __name__ == "__main__":
         main()
     # Handle keyboard interrupts
     except KeyboardInterrupt:
-        sys.exit(ERROR + '\n\n[!] Quitting...\n' + ENDC)
+        sys.exit(RED + '\n\n[!] Quitting...\n' + ENDC)
     # Handle exceptions
     except Exception, error:
-        sys.exit(ERROR + '\n[!] Something went wrong. Quitting...\n' + ENDC)
+        sys.exit(RED + '\n[!] Something went wrong. Quitting...\n' + ENDC)
