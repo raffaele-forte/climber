@@ -1,15 +1,16 @@
 Climber
 =======
 
-Automated auditing tool to check system misconfigurations which may 
-allow attackers to escalate the privileges.
+Automated auditing tool to check UNIX/Linux systems misconfigurations 
+which may allow local privilege escalation.
 
 
 Dependencies
 ------------
 
-* Python >= 2.7
+* python >= 2.7
 * python-crypto
+* python-mako
 * python-paramiko
 
 
@@ -20,7 +21,7 @@ automating network connections over protocols such as Telnet or SSH.
 
 https://github.com/knipknap/exscript
 
-This module is already included in Climber repository.
+This module is already included in Climber sources.
 
 
 License
