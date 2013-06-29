@@ -16,7 +16,6 @@
         <!-- JS -->
         <script type="text/javascript" src="javascripts/highlight.pack.js"></script>
         <script type="text/javascript" src="javascripts/jquery.min.js"></script>
-        <script type="text/javascript" src="javascripts/jquery.cookie.js"></script>
         <script type="text/javascript" src="javascripts/jquery.collapsible.min.js"></script>
         <script type="text/javascript">
             $(document).ready(function() {
