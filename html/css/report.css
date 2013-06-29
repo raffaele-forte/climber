@@ -1,10 +1,15 @@
 @CHARSET "UTF-8";
+
+#menu-collapsible {
+    text-align: right;
+}
+
 #navigation {
     width:250px;
 }
 
 #content {
-    width:700px;
+    width:100%;
 }
 
 #navigation,

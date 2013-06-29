@@ -38,7 +38,7 @@ def print_banner():
 
 def args_parser():
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description='Automated auditing tool to check UNIX/Linux systems misconfigurations which may allow local privilege escalation', version='Climber v.1.1 - Powered by Raffaele Forte')
+    parser = argparse.ArgumentParser(description='Automated auditing tool to check UNIX/Linux systems misconfigurations which may allow local privilege escalation', version='Climber v.1.1 - Copyleft Raffaele Forte')
    
     group = parser.add_argument_group('connection')
     group.add_argument('--host', action='store', help='set hostname or ip')
@@ -68,7 +68,7 @@ def html_report(dictionary, path):
         dict_tmp = {}
         dict_tmp = dictionary[category]
         
-        html_text += '<h2>' + category + '</h2>\n'
+        html_text += '        <h2>' + category + '</h2>\n\n'
 
         for plugin in sorted(dict_tmp.keys()):
             
@@ -79,7 +79,7 @@ def html_report(dictionary, path):
             html_text += '                <pre><code>' + cgi.escape(dict_tmp[plugin]) + '</code></pre>\n'
             html_text += '            </div>\n'
             html_text += '        </div>\n'
-            html_text += '        <!-- end collapsible -->\n'
+            html_text += '        <!-- end collapsible -->\n\n'
         
     html = html_template.render(html_block=html_text.decode('utf-8'))
 

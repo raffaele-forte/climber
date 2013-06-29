@@ -2,21 +2,33 @@
 <html>
     <head>
         <title>Climber - Scan results</title>
+        
         <!-- CSS -->
         <link rel="stylesheet" href="css/github.css" type="text/css" />
-        <link rel="stylesheet" href="css/demo.css" type="text/css" />
+        <link rel="stylesheet" href="css/report.css" type="text/css" />
         <!-- /CSS -->
+        
     </head>
     <body>
+    
         <h1>Climber - Scan results</h1>
+        
+        <p><em>Check UNIX/Linux systems for privilege escalation</em></p>
+        
         <div id="content">
-            <a href="#" id="closeAll" title="Close all">Close All</a> | <a href="#" id="openAll" title="Open All">Open All</a>
-            ${html_block}
+            <div id="menu-collapsible">
+                <a href="#" id="closeAll" title="Close all">Close All</a> | <a href="#" id="openAll" title="Open All">Open All</a>
+            </div>
+            
+${html_block}
+            
         </div>
+        
         <!-- JS -->
         <script type="text/javascript" src="javascripts/highlight.pack.js"></script>
         <script type="text/javascript" src="javascripts/jquery.min.js"></script>
         <script type="text/javascript" src="javascripts/jquery.collapsible.min.js"></script>
+        
         <script type="text/javascript">
             $(document).ready(function() {
             
