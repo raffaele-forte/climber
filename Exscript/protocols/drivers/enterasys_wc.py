@@ -1,4 +1,4 @@
-# Copyright (C) 2007-2010 Samuel Abels.
+# Copyright (C) 2014 Enno Groeper <groepeen@cms.hu-berlin.de>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2, as
@@ -13,32 +13,33 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
-A driver for devices running Juniper ERX OS.
+A driver for Enterasys/Extreme (HiPath) Wireless Controller devices.
+
+Created using a C5110 device.
 """
 import re
 from Exscript.protocols.drivers.driver import Driver
-from Exscript.protocols.drivers.ios    import _prompt_re
 
-_user_re     = [re.compile(r'[\r\n]User: $')]
-_password_re = [re.compile(r'[\r\n](Telnet password:|Password:) $')]
-_junos_re    = re.compile(r'\bJuniper Networks\b', re.I)
+_user_re = [re.compile(r'[\r\n]Username: $')]
+_password_re = [re.compile(r'[\r\n]Password: $')]
+_prompt_re = [
+    re.compile(r'[\r\n][a-zA-Z0-9-_ .]+# $'),  # base prompt
+    re.compile(r'[\r\n][a-zA-Z0-9-_ .]+(?::[A-Za-z0-9_.-]+)*# $')
+]
+_hwc_re = re.compile(r'Enterasys Wireless Convergence OS', re.I)
 
-class JunOSERXDriver(Driver):
+
+class EnterasysWCDriver(Driver):
     def __init__(self):
-        Driver.__init__(self, 'junos_erx')
-        self.user_re     = _user_re
+        Driver.__init__(self, 'enterasys_wc')
+        self.user_re = _user_re
         self.password_re = _password_re
-        self.prompt_re   = _prompt_re
+        self.prompt_re = _prompt_re
 
     def check_head_for_os(self, string):
-        if _junos_re.search(string):
-            return 75
+        if _hwc_re.search(string):
+            return 85
         return 0
 
     def init_terminal(self, conn):
-        conn.execute('terminal length 60')
-        conn.execute('terminal width 150')
-
-    def auto_authorize(self, conn, account, flush, bailout):
-        conn.send('enable 15\r')
-        conn.app_authorize(account, flush, bailout)
+        pass

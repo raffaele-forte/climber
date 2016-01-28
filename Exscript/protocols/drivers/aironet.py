@@ -1,4 +1,4 @@
-# Copyright (C) 2007-2010 Samuel Abels.
+# Copyright (C) 2015 Mike Pennington, Samuel Abels
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2, as
@@ -13,32 +13,33 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
-A driver for devices running Juniper ERX OS.
+A driver for Cisco Aironet Wireless Controllers
 """
 import re
 from Exscript.protocols.drivers.driver import Driver
-from Exscript.protocols.drivers.ios    import _prompt_re
 
-_user_re     = [re.compile(r'[\r\n]User: $')]
-_password_re = [re.compile(r'[\r\n](Telnet password:|Password:) $')]
-_junos_re    = re.compile(r'\bJuniper Networks\b', re.I)
+_user_re     = [re.compile(r'User:\s$', re.I)]
+_password_re = [re.compile(r'(?:[\r\n]Password: ?|last resort password:)$')]
+_prompt_re   = [re.compile(r'[\r\n].(?:(?:Cisco\sController)|(?:WiSM\S+?)|(?:\(.+\))).\s>$')]
+_error_re    = [re.compile(r'Incorrect\susage', re.I),
+                re.compile(r'Incorrect\sinput', re.I),
+                re.compile(r'connection timed out', re.I),
+                re.compile(r'[^\r\n]+ not found', re.I)]
 
-class JunOSERXDriver(Driver):
+class AironetDriver(Driver):
     def __init__(self):
-        Driver.__init__(self, 'junos_erx')
+        Driver.__init__(self, 'aironet')
         self.user_re     = _user_re
-        self.password_re = _password_re
         self.prompt_re   = _prompt_re
 
     def check_head_for_os(self, string):
-        if _junos_re.search(string):
-            return 75
+        if '(Cisco Controller)' in string:
+            return 90
+        elif '(WiSM-slot' in string:
+            return 90
+        elif ') >' in string:
+            return 87
         return 0
 
     def init_terminal(self, conn):
-        conn.execute('terminal length 60')
-        conn.execute('terminal width 150')
-
-    def auto_authorize(self, conn, account, flush, bailout):
-        conn.send('enable 15\r')
-        conn.app_authorize(account, flush, bailout)
+        conn.execute('config paging disable')

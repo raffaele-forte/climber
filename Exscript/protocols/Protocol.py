@@ -29,7 +29,7 @@ from Exscript.util.crypt import otp
 from Exscript.util.event import Event
 from Exscript.util.cast import to_regexs
 from Exscript.util.tty import get_terminal_size
-from Exscript.protocols.drivers import driver_map, isdriver
+from Exscript.protocols.drivers import driver_map, Driver
 from Exscript.protocols.OsGuesser import OsGuesser
 from Exscript.protocols.Exception import InvalidCommandException, \
                                          LoginFailure, \
@@ -52,15 +52,15 @@ class Protocol(object):
     of the API.
 
     The goal of all protocol classes is to provide an interface that
-    is unified accross protocols, such that the adapters may be used
-    interchangably without changing any other code.
+    is unified across protocols, such that the adapters may be used
+    interchangeably without changing any other code.
 
     In order to achieve this, the main challenge are the differences
     arising from the authentication methods that are used.
     The reason is that many devices may support the following variety
-    authentification/authorization methods:
+    authentication/authorization methods:
 
-        1. Protocol level authentification, such as SSH's built-in
+        1. Protocol level authentication, such as SSH's built-in
            authentication.
 
                 - p1: password only
@@ -69,12 +69,12 @@ class Protocol(object):
                 - p4: username + key
                 - p5: username + key + password
 
-        2. App level authentification, such that the authentification may
+        2. App level authentication, such that the authentication may
            happen long after a connection is already accepted.
            This type of authentication is normally used in combination with
            Telnet, but some SSH hosts also do this (users have reported
            devices from Enterasys). These devices may also combine
-           protocol-level authentification with app-level authentification.
+           protocol-level authentication with app-level authentication.
            The following types of app-level authentication exist:
 
                 - a1: password only
@@ -86,7 +86,7 @@ class Protocol(object):
            first serves to authenticate the user, and the second serves to
            authorize him.
            App-level authorization may support the same methods as app-level
-           authentification:
+           authentication:
 
                 - A1: password only
                 - A2: username
@@ -106,7 +106,7 @@ class Protocol(object):
           - a1 - a3: optional
           - A1 - A3: optional
 
-    To achieve authentication method compatibility accross different
+    To achieve authentication method compatibility across different
     protocols, we must hide all this complexity behind one single API
     call, and figure out which ones are supported.
 
@@ -116,14 +116,14 @@ class Protocol(object):
 
         key = PrivateKey.from_file('~/.ssh/id_rsa', 'my_key_password')
 
-        # The user account to use for protocol level authentification.
+        # The user account to use for protocol level authentication.
         # The key defaults to None, in which case key authentication is
         # not attempted.
         account = Account(name     = 'myuser',
                           password = 'mypassword',
                           key      = key)
 
-        # The account to use for app-level authentification.
+        # The account to use for app-level authentication.
         # password2 defaults to password.
         app_account = Account(name      = 'myuser',
                               password  = 'my_app_password',
@@ -140,11 +140,11 @@ class Protocol(object):
     a state such that the following call to expect_prompt() will either
     always work, or always fail.
 
-    We jhide the following methods behind the login() call::
+    We hide the following methods behind the login() call::
 
-        # Protocol level authentification.
+        # Protocol level authentication.
         conn.protocol_authenticate(...)
-        # App-level authentification.
+        # App-level authentication.
         conn.app_authenticate(...)
         # App-level authorization.
         conn.app_authorize(...)
@@ -205,6 +205,7 @@ class Protocol(object):
                  stdout             = None,
                  stderr             = None,
                  debug              = 0,
+                 connect_timeout    = 30,
                  timeout            = 30,
                  logfile            = None,
                  termtype           = 'dumb',
@@ -218,13 +219,14 @@ class Protocol(object):
           - otp_requested_event: The connected host requested a
           one-time-password to be entered.
 
-        @keyword driver: passed to set_driver().
+        @keyword driver: Driver()|str
         @keyword stdout: Where to write the device response. Defaults to
             os.devnull.
         @keyword stderr: Where to write debug info. Defaults to stderr.
         @keyword debug: An integer between 0 (no debugging) and 5 (very
             verbose debugging) that specifies the amount of debug info
             sent to the terminal. The default value is 0.
+        @keyword connect_timeout: Timeout for the initial TCP connection attempt
         @keyword timeout: See set_timeout(). The default value is 30.
         @keyword logfile: A file into which a log of the conversation with the
             device is dumped.
@@ -251,8 +253,9 @@ class Protocol(object):
         self.last_account          = None
         self.termtype              = termtype
         self.verify_fingerprint    = verify_fingerprint
-        self.manual_driver         = driver
+        self.manual_driver         = None
         self.debug                 = debug
+        self.connect_timeout       = connect_timeout
         self.timeout               = timeout
         self.logfile               = logfile
         self.response              = None
@@ -270,6 +273,18 @@ class Protocol(object):
             self.log = None
         else:
             self.log = open(logfile, 'a')
+
+        # set manual_driver
+        if driver is not None:
+            if isinstance(driver, str):
+                if driver in driver_map:
+                    self.manual_driver = driver_map[driver]
+                else:
+                    self._dbg(1, 'Invalid driver string given. Ignoring...')
+            elif isinstance(driver, Driver):
+                self.manual_driver = driver
+            else:
+                self._dbg(1, 'Invalid driver given. Ignoring...')
 
     def __copy__(self):
         """
@@ -342,12 +357,12 @@ class Protocol(object):
         """
         Defines the driver that is used to recognize prompts and implement
         behavior depending on the remote system.
-        The driver argument may be an subclass of protocols.drivers.Driver,
-        a known driver name (string), or None.
+        The driver argument may be an instance of a protocols.drivers.Driver
+        subclass, a known driver name (string), or None.
         If the driver argument is None, the adapter automatically chooses
-        a driver using the the guess_os() function.
+        a driver using the guess_os() function.
 
-        @type  driver: Driver|str
+        @type  driver: Driver()|str
         @param driver: The pattern that, when matched, causes an error.
         """
         if driver is None:
@@ -356,7 +371,7 @@ class Protocol(object):
             if driver not in driver_map:
                 raise TypeError('no such driver:' + repr(driver))
             self.manual_driver = driver_map[driver]
-        elif isdriver(driver):
+        elif isinstance(driver, Driver):
             self.manual_driver = driver
         else:
             raise TypeError('unsupported argument type:' + type(driver))
@@ -516,6 +531,24 @@ class Protocol(object):
             return self.manual_login_error_re
         return self.get_driver().login_error_re
 
+    def set_connect_timeout(self, timeout):
+        """
+        Defines the maximum time that the adapter waits for initial connection.
+
+        @type  timeout: int
+        @param timeout: The maximum time in seconds.
+        """
+        self.connect_timeout = int(timeout)
+
+    def get_connect_timeout(self):
+        """
+        Returns the current connect_timeout in seconds.
+
+        @rtype:  int
+        @return: The connect_timeout in seconds.
+        """
+        return self.connect_timeout
+
     def set_timeout(self, timeout):
         """
         Defines the maximum time that the adapter waits before a call to
@@ -582,9 +615,9 @@ class Protocol(object):
         argument.
 
         @type  account: Account
-        @param account: The account for protocol level authentification.
+        @param account: The account for protocol level authentication.
         @type  app_account: Account
-        @param app_account: The account for app level authentification.
+        @param app_account: The account for app level authentication.
         @type  flush: bool
         @param flush: Whether to flush the last prompt from the buffer.
         """
@@ -604,9 +637,9 @@ class Protocol(object):
             L{login()}, stick with L{login}.
 
         @type  account: Account
-        @param account: The account for protocol level authentification.
+        @param account: The account for protocol level authentication.
         @type  app_account: Account
-        @param app_account: The account for app level authentification.
+        @param app_account: The account for app level authentication.
         @type  flush: bool
         @param flush: Whether to flush the last prompt from the buffer.
         """
@@ -625,7 +658,7 @@ class Protocol(object):
 
     def protocol_authenticate(self, account = None):
         """
-        Low-level API to perform protocol-level authentification on protocols
+        Low-level API to perform protocol-level authentication on protocols
         that support it.
 
         @note: In most cases, you want to use the login() method instead, as
@@ -1005,7 +1038,7 @@ class Protocol(object):
         incoming data.
 
         @note: If you want to catch all incoming data regardless of a
-        pattern, use the L{Protocol.on_data_received} event instead.
+        pattern, use the Protocol.data_received_event event instead.
 
         Arguments passed to the callback are the protocol instance, the
         index of the match, and the match object of the regular expression.
@@ -1165,7 +1198,7 @@ class Protocol(object):
 
     def guess_os(self):
         """
-        Returns an identifer that specifies the operating system that is
+        Returns an identifier that specifies the operating system that is
         running on the remote host. This OS is obtained by watching the
         response of the remote host, such as any messages retrieved during
         the login procedure.

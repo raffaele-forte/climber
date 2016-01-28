@@ -41,13 +41,13 @@ from Exscript.protocols.drivers.driver import Driver
 #
 
 _user_re     = [re.compile(r'[\r\n]login: $')]
-_password_re = [re.compile(r'[\r\n]Password: ?$')]
+_password_re = [re.compile(r'[\r\n](Local )?[Pp]assword: ?$')]
 _mb          = r'(?:\{master(?::\d+)?\}|\{backup(?::\d+)?\})'
 _ps          = r'(?:\{primary:node\d+\}|\{secondary:node\d+\})'
 _re_re       = r'(?:'+ _mb + r'|' + _ps + r')'
 _edit        = r'(?:\[edit[^\]\r\n]*\])'
 _prefix      = r'(?:[\r\n]+' + _re_re + r'?' + _edit + r'?)'
-_prompt      = r'[\r\n]+[\w\-]+@[\-\w+\.:]+[%>#] $'
+_prompt      = r'[\r\n]+[\w\-\.]+@[\-\w+\.:]+[%>#] $'
 _prompt_re   = [re.compile(_prefix + r'?' + _prompt)]
 _error_re    = [re.compile('^(unknown|invalid|error)', re.I)]
 _junos_re    = re.compile(r'\bjunos\b', re.I)

@@ -61,7 +61,8 @@ _login_fail = [r'bad secrets',
                r'too short',
                r'incorrect',
                r'connection timed out',
-               r'failed']
+               r'failed',
+               r'failure']
 _login_fail_re = [re.compile(_nl          \
                            + r'[^\r\n]*'  \
                            + r'(?:' + '|'.join(_login_fail) + r')', _flags)]
@@ -88,7 +89,7 @@ class Driver(object):
         return self.name, self.check_response_for_os(string)
 
     def clean_response_for_re_match(self, response):
-        return response
+        return response, ''
 
     def init_terminal(self, conn):
         pass

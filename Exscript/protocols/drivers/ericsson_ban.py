@@ -13,32 +13,43 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
-A driver for devices running Juniper ERX OS.
+A driver for devices running Ericsson's Broadband Access Nodes (BAN) OS
 """
 import re
 from Exscript.protocols.drivers.driver import Driver
-from Exscript.protocols.drivers.ios    import _prompt_re
 
-_user_re     = [re.compile(r'[\r\n]User: $')]
-_password_re = [re.compile(r'[\r\n](Telnet password:|Password:) $')]
-_junos_re    = re.compile(r'\bJuniper Networks\b', re.I)
+_user_re     = [re.compile(r'user:', re.I)]
+_password_re = [re.compile(r'pass:', re.I)]
+_prompt_re   = [re.compile(r'[\r\n][\-\w+\.]+(?:\([^\)]+\))?[%#] ?$|(?:\(y/n\)\[n\])')]
+_error_re    = [re.compile(r'\(error\)')]
 
-class JunOSERXDriver(Driver):
+_ban_re = re.compile(r"BLM\d+ - Broadband Loop Multiplexer", re.I)
+
+_banner_re = re.compile(r"Last login", re.I)
+
+_login_fail_re = [r'Login failed']
+
+
+class EricssonBanDriver(Driver):
     def __init__(self):
-        Driver.__init__(self, 'junos_erx')
+        Driver.__init__(self, 'ericsson_ban')
+
         self.user_re     = _user_re
         self.password_re = _password_re
         self.prompt_re   = _prompt_re
+        self.error_re   = _error_re
+        self.login_error_re = _login_fail_re
+
+    # def auto_authorize(self, conn, account, flush, bailout):
+    #     conn.send('enable\r\n')
+    #     conn.app_authorize(account, flush, bailout)
 
     def check_head_for_os(self, string):
-        if _junos_re.search(string):
-            return 75
+        if _ban_re.search(string):
+            return 90
         return 0
 
-    def init_terminal(self, conn):
-        conn.execute('terminal length 60')
-        conn.execute('terminal width 150')
-
-    def auto_authorize(self, conn, account, flush, bailout):
-        conn.send('enable 15\r')
-        conn.app_authorize(account, flush, bailout)
+    def check_response_for_os(self, string):
+        if _banner_re.search(string):
+            return 20
+        return 0

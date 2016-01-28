@@ -182,6 +182,7 @@ class Telnet:
         self.irawq = 0
         self.cookedq = StringIO()
         self.eof = 0
+        self.connect_timeout      = kwargs.get('connect_timeout',     None)
         self.window_size          = kwargs.get('termsize')
         self.stdout               = kwargs.get('stdout',           sys.stdout)
         self.stderr               = kwargs.get('stderr',           sys.stderr)
@@ -210,6 +211,7 @@ class Telnet:
             af, socktype, proto, canonname, sa = res
             try:
                 self.sock = socket.socket(af, socktype, proto)
+                self.sock.settimeout(self.connect_timeout)
                 self.sock.connect(sa)
             except socket.error, msg:
                 if self.sock:
@@ -565,28 +567,39 @@ class Telnet:
         list = list[:]
         indices = range(len(list))
         search_window_size = 150
+        head_loockback_size = 10
         for i in indices:
             if not hasattr(list[i], "search"):
                 if not re: import re
                 list[i] = re.compile(list[i])
         self.msg("Expecting %s" % [l.pattern for l in list])
+        incomplete_tail = ''
+        clean_sw_size = search_window_size
         while 1:
             self.process_rawq()
             if self.cancel_expect:
                 self.cancel_expect = False
                 self.msg('cancelling expect()')
                 return -2, None, ''
-            #print "Queue: >>>%s<<<" % repr(self.cookedq)
             qlen = self.cookedq.tell()
-            self.cookedq.seek(qlen - search_window_size)
-            search_window = self.cookedq.read()
-            #print "Search window: >>>%s<<<" % repr(search_window)
             if cleanup:
-                search_window = cleanup(search_window)
+                while 1:
+                    self.cookedq.seek(qlen - clean_sw_size - len(incomplete_tail) - head_loockback_size)
+                    search_window = self.cookedq.read()
+                    search_window, incomplete_tail = cleanup(search_window)
+                    if clean_sw_size > qlen or len(search_window) >= search_window_size:
+                        search_window = search_window[-search_window_size:]
+                        if len(search_window) > search_window_size:
+                            clean_sw_size = clean_sw_size - search_window_size
+                        break
+                    else:
+                        clean_sw_size = clean_sw_size + search_window_size
+            else:
+                self.cookedq.seek(qlen - search_window_size)
+                search_window = self.cookedq.read()
             for i in indices:
                 m = list[i].search(search_window)
                 if m is not None:
-                    #print "Match End:", m.end()
                     e    = len(m.group())
                     e    = qlen - e + 1
                     self.cookedq.seek(0)
@@ -597,7 +610,6 @@ class Telnet:
                         self.cookedq.write(search_window[m.end():])
                     else:
                         self.cookedq.seek(qlen)
-                    #print "END:", e, "MATCH:", i, m, repr(text)
                     return i, m, text
             if self.eof:
                 break
