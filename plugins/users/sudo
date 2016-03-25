@@ -1,0 +1,2 @@
+export SUDO_ASKPASS="/usr/bin/yes"
+sudo -l 
