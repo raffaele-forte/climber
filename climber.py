@@ -14,7 +14,7 @@ import sys
 import time
 
 # Customizable paths
-INSTALL_PATH = os.path.dirname(__file__)
+INSTALL_PATH = os.path.dirname(os.path.abspath(__file__))
 LOGS_PATH = expanduser('~') + '/climber'
 
 # Terminal colors
